@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#fce4ec" />
+  <title>Um questionário muito sério</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    /* ---------- Reset & base ---------- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --rosa-claro: #ffe4ec;
+      --rosa-medio: #ffc6d9;
+      --rosa-forte: #ff6f9c;
+      --lilas: #e7d8ff;
+      --lilas-forte: #b48cff;
+      --vermelho-suave: #ff8c94;
+      --texto: #6b4a5b;
+      --texto-suave: #9b7a8a;
+      --branco: #fffafc;
+      --sombra: 0 10px 30px rgba(255, 111, 156, 0.18);
+      --sombra-forte: 0 14px 40px rgba(255, 111, 156, 0.35);
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
+
+    body {
+      font-family: 'Quicksand', system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--texto);
+      background:
+        radial-gradient(circle at 20% 20%, var(--rosa-claro) 0%, transparent 55%),
+        radial-gradient(circle at 80% 80%, var(--lilas) 0%, transparent 55%),
+        linear-gradient(135deg, #fff5f8 0%, #fdf3ff 100%);
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* corações decorativos no fundo */
+    .fundo-coracoes {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .fundo-coracoes span {
+      position: absolute;
+      font-size: 18px;
+      opacity: 0.35;
+      animation: subir 14s linear infinite;
+      filter: blur(0.3px);
+    }
+    @keyframes subir {
+      0%   { transform: translateY(110vh) scale(0.8) rotate(0deg);   opacity: 0; }
+      10%  { opacity: 0.5; }
+      90%  { opacity: 0.4; }
+      100% { transform: translateY(-15vh) scale(1.1) rotate(360deg); opacity: 0; }
+    }
+
+    /* ---------- Telas ---------- */
+    .tela {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 22px;
+      text-align: center;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(14px) scale(0.985);
+      transition:
+        opacity .55s ease,
+        transform .55s cubic-bezier(.2,.8,.2,1),
+        visibility .55s;
+      z-index: 1;
+    }
+    .tela.ativa {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+    }
+
+    .cartao {
+      width: 100%;
+      max-width: 460px;
+      background: var(--branco);
+      border-radius: 28px;
+      padding: 36px 26px;
+      box-shadow: var(--sombra);
+      border: 1px solid rgba(255, 198, 217, 0.6);
+      position: relative;
+    }
+    .cartao::before {
+      content: "♡";
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--rosa-forte);
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 6px 14px rgba(255,111,156,0.4);
+    }
+
+    h1 {
+      font-family: 'Caveat', 'Quicksand', cursive;
+      font-size: clamp(28px, 7vw, 38px);
+      line-height: 1.15;
+      color: var(--rosa-forte);
+      margin-bottom: 10px;
+    }
+    h2 {
+      font-size: clamp(20px, 5.2vw, 26px);
+      font-weight: 600;
+      color: var(--texto);
+      margin-bottom: 22px;
+      line-height: 1.3;
+    }
+    p.sub {
+      font-size: 15px;
+      color: var(--texto-suave);
+      margin-bottom: 26px;
+    }
+
+    /* ---------- Botões ---------- */
+    .btn {
+      display: inline-block;
+      width: 100%;
+      padding: 14px 22px;
+      border: none;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(135deg, var(--rosa-forte), var(--lilas-forte));
+      cursor: pointer;
+      box-shadow: var(--sombra);
+      transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: var(--sombra-forte); }
+    .btn:active { transform: translateY(0); filter: brightness(0.97); }
+
+    .btn.opcao {
+      background: #fff;
+      color: var(--texto);
+      border: 2px solid var(--rosa-medio);
+      box-shadow: 0 6px 14px rgba(255, 111, 156, 0.12);
+      text-align: left;
+      padding: 14px 18px;
+    }
+    .btn.opcao:hover {
+      background: var(--rosa-claro);
+      border-color: var(--rosa-forte);
+      color: var(--rosa-forte);
+    }
+    .opcoes {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* ---------- Tela final ---------- */
+    .botoes-final {
+      position: relative;
+      width: 100%;
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* SIM e NÃO: mesmo tamanho, lado a lado (estilo modal: cancelar | confirmar) */
+    #btnSim, #btnNao {
+      position: absolute;
+      top: 50%;
+      padding: 14px 0;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: inherit;
+      border-radius: 999px;
+      cursor: pointer;
+      width: 130px;
+      text-align: center;
+      transition: top .35s cubic-bezier(.2,.8,.2,1),
+                  left .35s cubic-bezier(.2,.8,.2,1),
+                  transform .2s ease,
+                  box-shadow .2s ease,
+                  filter .2s ease;
+      z-index: 5;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* NÃO — estilo "cancelar" (secundário, à esquerda) */
+    #btnNao {
+      left: calc(50% - 70px);
+      transform: translate(-50%, -50%);
+      background: #fff;
+      color: var(--texto-suave);
+      border: 2px solid var(--lilas);
+      box-shadow: 0 4px 10px rgba(180, 140, 255, 0.18);
+    }
+    /* SIM — estilo "confirmar" (primário rosa, à direita) */
+    #btnSim {
+      left: calc(50% + 70px);
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, var(--rosa-forte), #ff5286);
+      color: #fff;
+      border: 2px solid transparent;
+      box-shadow: 0 8px 20px rgba(255, 82, 134, 0.35);
+    }
+    #btnSim:hover {
+      transform: translate(-50%, calc(-50% - 2px));
+      box-shadow: 0 12px 26px rgba(255, 82, 134, 0.5);
+      filter: brightness(1.03);
+    }
+    #btnSim:active {
+      transform: translate(-50%, -50%);
+      filter: brightness(0.97);
+    }
+
+    /* ---------- Tela de comemoração ---------- */
+    .comemoracao h1 {
+      font-size: clamp(34px, 9vw, 52px);
+      color: var(--rosa-forte);
+      margin-bottom: 8px;
+    }
+    .comemoracao .emoji {
+      font-size: 64px;
+      margin-bottom: 8px;
+      animation: balancar 1.8s ease-in-out infinite;
+      display: inline-block;
+    }
+    @keyframes balancar {
+      0%, 100% { transform: rotate(-6deg); }
+      50%      { transform: rotate(6deg); }
+    }
+    .combinado {
+      margin-top: 18px;
+      padding: 18px;
+      background: var(--rosa-claro);
+      border-radius: 18px;
+      color: var(--texto);
+      font-size: 16px;
+      line-height: 1.5;
+      border: 1px dashed var(--rosa-forte);
+    }
+    .combinado strong { color: var(--rosa-forte); }
+
+    /* chuva de corações na comemoração */
+    #chuvaCoracoes {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 999;
+    }
+    .coracao-caindo {
+      position: absolute;
+      top: -40px;
+      font-size: 24px;
+      animation: cair linear forwards;
+      will-change: transform, opacity;
+    }
+    @keyframes cair {
+      0%   { transform: translateY(-10vh) rotate(0deg);   opacity: 0; }
+      10%  { opacity: 1; }
+      100% { transform: translateY(110vh) rotate(360deg); opacity: 0.9; }
+    }
+
+    /* ---------- Toast (alerta fofo) ---------- */
+    #toast {
+      position: fixed;
+      left: 50%;
+      bottom: 36px;
+      transform: translateX(-50%) translateY(40px);
+      background: #fff;
+      color: var(--texto);
+      padding: 14px 22px;
+      border-radius: 999px;
+      box-shadow: var(--sombra-forte);
+      border: 2px solid var(--rosa-medio);
+      font-weight: 600;
+      font-size: 15px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s ease, transform .35s cubic-bezier(.2,.8,.2,1);
+      z-index: 9999;
+      max-width: 90vw;
+      text-align: center;
+    }
+    #toast.mostrar {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ---------- Responsivo ---------- */
+    @media (max-width: 380px) {
+      .cartao { padding: 30px 20px; border-radius: 22px; }
+      #btnSim { padding: 18px 40px; }
+    }
+    @media (min-height: 720px) {
+      .botoes-final { min-height: 280px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        transition-duration: 0.2s !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- corações decorativos de fundo -->
+  <div class="fundo-coracoes" id="fundoCoracoes" aria-hidden="true"></div>
+
+  <!-- TELA 1: Início -->
+  <section class="tela ativa" id="tela-inicio">
+    <div class="cartao">
+      <h1>Oi, meu bem! Preparei um testezinho pra você 💌</h1>
+      <p class="sub">Prometo que é rapidinho. E que tem prêmio no final.</p>
+      <button class="btn" onclick="irPara('tela-q1')">Começar</button>
+    </div>
+  </section>
+
+  <!-- TELA 2: Pergunta 1 -->
+  <section class="tela" id="tela-q1">
+    <div class="cartao">
+      <h1>Pergunta 1 de 2</h1>
+      <h2>Qual é a oitava maravilha do mundo?</h2>
+      <div class="opcoes">
+        <button class="btn opcao" onclick="errou('Pizza é boa, mas não é A RESPOSTA. 🍕')">A) Pizza</button>
+        <button class="btn opcao" onclick="errou('Dormir é maravilhoso… mas tem coisa mais maravilhosa. 😴')">B) Dormir</button>
+        <button class="btn opcao" onclick="irPara('tela-q2')">C) Você</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TELA 3: Pergunta 2 -->
+  <section class="tela" id="tela-q2">
+    <div class="cartao">
+      <h1>Pergunta 2 de 2</h1>
+      <h2>O que combina perfeitamente com o próximo fim de semana?</h2>
+      <div class="opcoes">
+        <button class="btn opcao" onclick="errou('Ficar em casa é covardia. Tenta de novo. 🛋️')">A) Ficar em casa</button>
+        <button class="btn opcao" onclick="irPara('tela-final')">B) Sair comigo para comer algo bom e dar risada</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TELA 4: Convite -->
+  <section class="tela" id="tela-final">
+    <div class="cartao">
+      <h1>Então… 💖</h1>
+      <h2>Aceita sair comigo?</h2>
+      <div class="botoes-final" id="areaBotoesFinal">
+        <button id="btnSim" class="btn" onclick="comemorar()">SIM</button>
+        <button id="btnNao" type="button">NÃO</button>
+      </div>
+      <p class="sub" style="margin-top:14px;">Dica: o botão "NÃO" anda meio tímido hoje... </p>
+    </div>
+  </section>
+
+  <!-- TELA 5: Comemoração -->
+  <section class="tela comemoracao" id="tela-comemoracao">
+    <div class="cartao">
+      <div class="emoji">🥰</div>
+      <h1>Perfeito! 🎉</h1>
+      <p class="sub">Você acabou de fazer meu dia (mês, ano, década…).</p>
+      <div class="combinado">
+        Tá combinado então 💕<br>
+        A gente acerta <strong>o dia, a hora e o lugar</strong> pelo WhatsApp.<br>
+        Eu te busco e prometo te fazer rir até doer as duas bochechas. 💞
+      </div>
+    </div>
+  </section>
+
+  <!-- chuva de corações (renderizada ao comemorar) -->
+  <div id="chuvaCoracoes" aria-hidden="true"></div>
+
+  <!-- toast de alerta fofo -->
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    /* ---------- Navegação entre telas ---------- */
+    function irPara(idTela) {
+      document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
+      const alvo = document.getElementById(idTela);
+      // pequeno delay pra animação de saída ser percebida
+      setTimeout(() => alvo.classList.add('ativa'), 60);
+    }
+
+    /* ---------- Toast (alerta fofo) ---------- */
+    let toastTimeout;
+    function mostrarToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = 'Errou! ' + msg;
+      toast.classList.add('mostrar');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => toast.classList.remove('mostrar'), 2600);
+    }
+    function errou(msg) {
+      mostrarToast(msg);
+    }
+
+    /* ---------- Botão NÃO foge ---------- */
+    const btnNao = document.getElementById('btnNao');
+    const areaFinal = document.getElementById('areaBotoesFinal');
+    // posição inicial vem do CSS (SIM à esquerda, NÃO à direita)
+
+    function fugir() {
+      const margem = 12;
+      const larguraTela = window.innerWidth;
+      const alturaTela = window.innerHeight;
+
+      const rect = btnNao.getBoundingClientRect();
+      const larguraBtn = rect.width || 80;
+      const alturaBtn = rect.height || 40;
+
+      const maxX = larguraTela - larguraBtn - margem;
+      const maxY = alturaTela - alturaBtn - margem;
+
+      const novoX = Math.max(margem, Math.floor(Math.random() * maxX));
+      const novoY = Math.max(margem, Math.floor(Math.random() * maxY));
+
+      // muda para position fixed para escapar do cartão
+      btnNao.style.position = 'fixed';
+      btnNao.style.transform = 'none';
+      btnNao.style.left = novoX + 'px';
+      btnNao.style.top  = novoY + 'px';
+    }
+
+    // foge no mouseover (desktop)
+    btnNao.addEventListener('mouseenter', fugir);
+    btnNao.addEventListener('mouseover', fugir);
+    btnNao.addEventListener('focus', fugir);
+    // foge no clique também (garantia)
+    btnNao.addEventListener('click', (e) => { e.preventDefault(); fugir(); });
+
+    // no celular: foge ao tocar e ao chegar perto com o dedo
+    btnNao.addEventListener('touchstart', (e) => { e.preventDefault(); fugir(); }, { passive: false });
+
+    // dedo "passando por cima" no mobile: detecta proximidade durante touchmove
+    document.addEventListener('touchmove', (e) => {
+      if (document.getElementById('tela-final').classList.contains('ativa')) {
+        const t = e.touches[0];
+        if (!t) return;
+        const r = btnNao.getBoundingClientRect();
+        const expand = 30;
+        if (
+          t.clientX > r.left - expand && t.clientX < r.right + expand &&
+          t.clientY > r.top  - expand && t.clientY < r.bottom + expand
+        ) {
+          fugir();
+        }
+      }
+    }, { passive: true });
+
+    /* ---------- Comemoração ---------- */
+    function comemorar() {
+      irPara('tela-comemoracao');
+      iniciarChuvaCoracoes();
+    }
+
+    function iniciarChuvaCoracoes() {
+      const container = document.getElementById('chuvaCoracoes');
+      container.innerHTML = '';
+      const emojis = ['💖','💕','💗','💘','💝','❤️','🌸','💞'];
+      const total = 60;
+      for (let i = 0; i < total; i++) {
+        const c = document.createElement('span');
+        c.className = 'coracao-caindo';
+        c.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.fontSize = (16 + Math.random() * 22) + 'px';
+        const duracao = 3 + Math.random() * 4;
+        const atraso = Math.random() * 3;
+        c.style.animationDuration = duracao + 's';
+        c.style.animationDelay = atraso + 's';
+        container.appendChild(c);
+      }
+      // re-spawn contínuo a cada 5s
+      setTimeout(iniciarChuvaCoracoes, 5000);
+    }
+
+    /* ---------- Fundo: corações flutuando ---------- */
+    (function criarFundo() {
+      const fundo = document.getElementById('fundoCoracoes');
+      const emojis = ['♡','♥','🌸','✿'];
+      const total = 14;
+      for (let i = 0; i < total; i++) {
+        const s = document.createElement('span');
+        s.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        s.style.left = Math.random() * 100 + 'vw';
+        s.style.fontSize = (14 + Math.random() * 14) + 'px';
+        s.style.color = Math.random() > 0.5 ? '#ff8fb0' : '#c8a4ff';
+        s.style.animationDuration = (10 + Math.random() * 12) + 's';
+        s.style.animationDelay = (Math.random() * 14) + 's';
+        fundo.appendChild(s);
+      }
+    })();
+
+    /* reposiciona o NÃO se a tela mudar de tamanho */
+    window.addEventListener('resize', () => {
+      if (document.getElementById('tela-final').classList.contains('ativa')) {
+        // mantém ele dentro da viewport
+        const rect = btnNao.getBoundingClientRect();
+        if (rect.right > window.innerWidth || rect.bottom > window.innerHeight) {
+          fugir();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
